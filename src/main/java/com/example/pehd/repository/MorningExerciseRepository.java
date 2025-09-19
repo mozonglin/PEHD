@@ -15,10 +15,15 @@ import java.util.Optional;
 public interface MorningExerciseRepository extends JpaRepository<MorningExercise, String> {
     
     /**
-     * 查找当前活跃的早操考勤活动
+     * 查找当前活跃的早操考勤活动（按学院匹配院级管理员）
      */
-    @Query("SELECT me FROM MorningExercise me WHERE me.isActive = true AND me.startTime <= :currentTime AND me.endTime >= :currentTime ORDER BY me.createdAt DESC")
-    Optional<MorningExercise> findCurrentActiveExercise(@Param("currentTime") LocalDateTime currentTime);
+    @Query("SELECT me FROM MorningExercise me " +
+           "LEFT JOIN SchoolAdmin creator ON me.createdBy = creator.id " +
+           "WHERE me.isActive = true AND me.startTime <= :currentTime AND me.endTime >= :currentTime " +
+           "AND creator.departmentName = :college " +
+           "ORDER BY me.createdAt DESC")
+    Optional<MorningExercise> findCurrentActiveExerciseByCollege(@Param("currentTime") LocalDateTime currentTime, 
+                                                               @Param("college") String college);
     
     /**
      * 根据日期查找早操考勤活动
@@ -74,6 +79,16 @@ public interface MorningExerciseRepository extends JpaRepository<MorningExercise
      * 根据具体日期查找早操活动（单个结果）
      */
     Optional<MorningExercise> findByDate(LocalDate date);
+    
+    /**
+     * 根据日期和学院查找早操活动（院级管理员发布的活动）
+     */
+    @Query("SELECT me FROM MorningExercise me " +
+           "LEFT JOIN SchoolAdmin creator ON me.createdBy = creator.id " +
+           "WHERE me.date = :date AND creator.departmentName = :college " +
+           "ORDER BY me.createdAt DESC")
+    Optional<MorningExercise> findByDateAndCollege(@Param("date") LocalDate date, 
+                                                  @Param("college") String college);
 }
 
 

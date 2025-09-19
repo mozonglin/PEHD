@@ -61,11 +61,20 @@ public class MorningExerciseService {
     // private WebSocketPushService webSocketPushService;
     
     /**
-     * 获取当前进行中的早操考勤活动
+     * 获取当前进行中的早操考勤活动（按用户学院匹配）
      */
-    public Optional<MorningExerciseDto> getCurrentMorningExercise() {
+    public Optional<MorningExerciseDto> getCurrentMorningExercise(String userId) {
+        // 获取用户信息
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("用户不存在"));
+        
+        String college = user.getCollege();
+        if (college == null || college.trim().isEmpty()) {
+            throw new RuntimeException("用户学院信息缺失，无法查询早操活动");
+        }
+        
         LocalDateTime now = LocalDateTime.now();
-        Optional<MorningExercise> currentExercise = morningExerciseRepository.findCurrentActiveExercise(now);
+        Optional<MorningExercise> currentExercise = morningExerciseRepository.findCurrentActiveExerciseByCollege(now, college);
         
         return currentExercise.map(this::convertToDto);
     }

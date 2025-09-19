@@ -44,17 +44,28 @@ public class StatisticsService {
     public List<ClassAttendanceRecordDto> getClassAttendanceRecords(LocalDate date, String className) {
         logger.info("获取班级早操考勤记录 - 日期: {}, 班级: {}", date, className);
         
-        // 查找指定日期的早操活动
-        Optional<MorningExercise> exercise = morningExerciseRepository.findByDate(date);
+        // 获取班级所有学生来确定学院信息
+        List<User> classStudents = userRepository.findByClassName(className);
+        if (classStudents.isEmpty()) {
+            logger.warn("班级中没有学生: {}", className);
+            return new ArrayList<>();
+        }
+        
+        // 通过班级学生的学院信息查找对应的早操活动
+        String college = classStudents.get(0).getCollege();
+        if (college == null || college.trim().isEmpty()) {
+            logger.warn("班级学生学院信息缺失: {}", className);
+            return new ArrayList<>();
+        }
+        
+        // 查找指定日期和学院的早操活动
+        Optional<MorningExercise> exercise = morningExerciseRepository.findByDateAndCollege(date, college);
         if (!exercise.isPresent()) {
-            logger.warn("指定日期没有早操活动: {}", date);
+            logger.warn("指定日期和学院没有早操活动 - 日期: {}, 学院: {}", date, college);
             return new ArrayList<>();
         }
         
         String exerciseId = exercise.get().getId();
-        
-        // 获取班级所有学生
-        List<User> classStudents = userRepository.findByClassName(className);
         
         // 获取已签到的学生记录
         List<Object[]> attendanceResults = attendanceRepository.findAttendanceRecordsByDateAndClass(

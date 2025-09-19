@@ -37,7 +37,7 @@ public class MorningExerciseController {
             // 验证用户身份
             String userId = getUserId(authentication);
             
-            Optional<MorningExerciseDto> currentExercise = morningExerciseService.getCurrentMorningExercise();
+            Optional<MorningExerciseDto> currentExercise = morningExerciseService.getCurrentMorningExercise(userId);
             
             if (currentExercise.isPresent()) {
                 return ResponseEntity.ok(new ApiResponse<>(true, "获取成功", currentExercise.get()));
