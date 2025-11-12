@@ -35,6 +35,13 @@ dependencies {
     // MySQL connector
     implementation 'com.mysql:mysql-connector-j:8.2.0'
     
+    // Hibernate commons annotations
+    implementation 'org.hibernate.common:hibernate-commons-annotations:6.0.6.Final'
+    
+    // JAXB dependencies for Hibernate
+    implementation 'jakarta.xml.bind:jakarta.xml.bind-api:4.0.0'
+    implementation 'org.glassfish.jaxb:jaxb-runtime:4.0.2'
+    
     // JSON processing
     implementation 'com.fasterxml.jackson.core:jackson-core'
     implementation 'com.fasterxml.jackson.core:jackson-databind'

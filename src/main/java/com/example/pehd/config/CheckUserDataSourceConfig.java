@@ -51,9 +51,9 @@ public class CheckUserDataSourceConfig {
                 .persistenceUnit("checkuser")
                 .properties(java.util.Map.of(
                     "hibernate.dialect", "org.hibernate.dialect.MySQLDialect",
-                    "hibernate.hbm2ddl.auto", "validate",
-                    "hibernate.show_sql", "true",
-                    "hibernate.format_sql", "true"
+                    "hibernate.hbm2ddl.auto", "none",
+                    "hibernate.show_sql", "false",
+                    "hibernate.format_sql", "false"
                 ))
                 .build();
     }
