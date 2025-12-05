@@ -410,6 +410,102 @@ GET /sunshine-run/class-ranking
 
 ---
 
+### 8. 查询指定操场坐标
+**接口说明**：根据学校和操场名称查询具体坐标位置
+
+**请求方式**：`GET`
+
+**接口路径**：`/sunshine-run/playground-coordinate`
+
+**权限要求**：需要登录（所有用户）
+
+**请求头**：
+```
+Authorization: Bearer {access_token}
+```
+
+**查询参数**：
+| 参数名 | 类型 | 必填 | 说明 |
+|--------|------|------|------|
+| school | String | 是 | 学校名称 |
+| playgroundName | String | 是 | 操场名称 |
+
+**请求示例**：
+```
+GET /sunshine-run/playground-coordinate?school=清华大学&playgroundName=东操场
+```
+
+**响应示例**：
+```json
+{
+  "success": true,
+  "message": "查询成功",
+  "data": {
+    "school": "清华大学",
+    "playgroundName": "东操场",
+    "longitude1": 116.326520,
+    "latitude1": 40.003690,
+    "longitude2": 116.327820,
+    "latitude2": 40.003990
+  }
+}
+```
+
+---
+
+### 9. 获取学校和操场下拉列表
+**接口说明**：获取所有学校名称以及每个学校包含的操场列表，用于下拉选择
+
+**请求方式**：`GET`
+
+**接口路径**：`/sunshine-run/playground-dropdown`
+
+**权限要求**：需要登录（所有用户）
+
+**请求头**：
+```
+Authorization: Bearer {access_token}
+```
+
+**请求示例**：
+```
+GET /sunshine-run/playground-dropdown
+```
+
+**响应示例**：
+```json
+{
+  "success": true,
+  "message": "查询成功",
+  "data": [
+    {
+      "school": "北京大学",
+      "playgrounds": [
+        {
+          "playgroundName": "第一体育场"
+        },
+        {
+          "playgroundName": "五四操场"
+        }
+      ]
+    },
+    {
+      "school": "清华大学",
+      "playgrounds": [
+        {
+          "playgroundName": "东操场"
+        },
+        {
+          "playgroundName": "西操场"
+        }
+      ]
+    }
+  ]
+}
+```
+
+---
+
 ## 错误码说明
 
 | 错误码 | 说明 | 处理建议 |
@@ -451,6 +547,30 @@ GET /sunshine-run/class-ranking
 }
 ```
 
+### PlaygroundCoordinate（操场坐标）
+```typescript
+{
+  school: string,                // 学校名称
+  playgroundName: string,        // 操场名称
+  longitude1: number,           // 第一个打卡点经度
+  latitude1: number,            // 第一个打卡点纬度
+  longitude2: number,           // 第二个打卡点经度
+  latitude2: number             // 第二个打卡点纬度
+}
+```
+
+### PlaygroundDropdown（学校操场下拉列表）
+```typescript
+{
+  school: string,                           // 学校名称
+  playgrounds: PlaygroundInfo[]             // 该学校的操场列表
+}
+
+interface PlaygroundInfo {
+  playgroundName: string        // 操场名称
+}
+```
+
 ---
 
 ## 使用场景示例
@@ -473,6 +593,12 @@ GET /sunshine-run/class-ranking
 3. APP调用班级统计接口（GET /sunshine-run/class-stats）
 4. 服务器返回班级所有学生的记录和统计数据
 5. APP展示班级整体情况和排名
+
+### 场景4：学生查询操场坐标
+1. 学生选择学校和操场名称
+2. APP调用坐标查询接口（GET /sunshine-run/playground-coordinate）
+3. 服务器返回操场的两个打卡点坐标
+4. APP在地图上标记两个打卡点位置
 
 ---
 

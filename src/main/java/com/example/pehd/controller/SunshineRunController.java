@@ -4,6 +4,7 @@ import com.example.pehd.dto.*;
 import com.example.pehd.entity.User;
 import com.example.pehd.repository.UserRepository;
 import com.example.pehd.service.SunshineRunService;
+import com.example.pehd.service.PlaygroundCoordinateService;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,9 +27,12 @@ public class SunshineRunController {
     
     @Autowired
     private SunshineRunService sunshineRunService;
-    
+
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private PlaygroundCoordinateService playgroundCoordinateService;
     
     /**
      * 1. 上传阳光跑记录
@@ -170,23 +174,66 @@ public class SunshineRunController {
             String userId = getUserId(authentication);
             User currentUser = userRepository.findById(userId)
                     .orElseThrow(() -> new RuntimeException("用户不存在"));
-            
+
             // 验证是否为班级管理员
             if (!isChecker(currentUser)) {
                 return ResponseEntity.badRequest()
                         .body(new ApiResponse<>(false, "权限不足，仅班级管理员可以查看", null));
             }
-            
+
             String className = currentUser.getClassName();
             if (className == null || className.trim().isEmpty()) {
                 return ResponseEntity.badRequest()
                         .body(new ApiResponse<>(false, "用户班级信息缺失", null));
             }
-            
+
             List<SunshineRunRankingDto> rankings = sunshineRunService.getClassRanking(className);
             return ResponseEntity.ok(new ApiResponse<>(true, "获取成功", rankings));
         } catch (Exception e) {
             logger.error("获取班级排行榜失败", e);
+            return ResponseEntity.badRequest()
+                    .body(new ApiResponse<>(false, e.getMessage(), null));
+        }
+    }
+
+    /**
+     * 8. 查询指定操场坐标
+     * GET /sunshine-run/playground-coordinate
+     */
+    @GetMapping("/playground-coordinate")
+    public ResponseEntity<ApiResponse<PlaygroundCoordinateDto>> getPlaygroundCoordinate(
+            @RequestParam String school,
+            @RequestParam String playgroundName,
+            Authentication authentication) {
+        try {
+            // 需要登录
+            getUserId(authentication);
+
+            PlaygroundCoordinateDto coordinate = playgroundCoordinateService
+                    .getCoordinateBySchoolAndPlayground(school, playgroundName);
+            return ResponseEntity.ok(new ApiResponse<>(true, "查询成功", coordinate));
+        } catch (Exception e) {
+            logger.error("查询操场坐标失败", e);
+            return ResponseEntity.badRequest()
+                    .body(new ApiResponse<>(false, e.getMessage(), null));
+        }
+    }
+
+    /**
+     * 9. 获取学校和操场下拉列表
+     * GET /sunshine-run/playground-dropdown
+     */
+    @GetMapping("/playground-dropdown")
+    public ResponseEntity<ApiResponse<List<PlaygroundDropdownDto>>> getPlaygroundDropdown(
+            Authentication authentication) {
+        try {
+            // 需要登录
+            getUserId(authentication);
+
+            List<PlaygroundDropdownDto> dropdown = playgroundCoordinateService.getPlaygroundDropdown();
+            return ResponseEntity.ok(new ApiResponse<>(true, "查询成功", dropdown));
+        } catch (Exception e) {
+            logger.error("获取下拉列表失败", e);
             return ResponseEntity.badRequest()
                     .body(new ApiResponse<>(false, e.getMessage(), null));
         }
