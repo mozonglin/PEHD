@@ -4,6 +4,7 @@ import com.example.pehd.dto.*;
 import com.example.pehd.entity.User;
 import com.example.pehd.repository.UserRepository;
 import com.example.pehd.service.StatisticsService;
+import com.example.pehd.service.HomeworkScoreService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +32,9 @@ public class StatisticsController {
     
     @Autowired
     private UserRepository userRepository;
+    
+    @Autowired
+    private HomeworkScoreService homeworkScoreService;
     
     /**
      * 1. 查看指定日期的班级早操考勤记录（包含缺勤学生）
@@ -154,6 +158,36 @@ public class StatisticsController {
         }
     }
     
+    
+    /**
+     * 4. 获取班级所有人课后作业次数（签到员权限）
+     * GET /statistics/homework-scores?date=2024-12-23
+     * 如果传入日期，返回该日期的记录；如果不传日期或传null，返回所有日期的记录
+     */
+    @GetMapping("/homework-scores")
+    public ResponseEntity<ApiResponse<List<ClassHomeworkScoreDto>>> getClassHomeworkScores(
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+            Authentication authentication) {
+        try {
+            // 验证用户身份
+            String userId = getUserId(authentication);
+            User currentUser = userRepository.findById(userId)
+                    .orElseThrow(() -> new RuntimeException("用户不存在"));
+            
+            // 获取学号
+            String studentId = currentUser.getStudentId();
+            
+            // 调用服务层获取课后作业成绩（权限验证在服务层进行）
+            List<ClassHomeworkScoreDto> scores = homeworkScoreService.getClassHomeworkScores(studentId, date);
+            
+            return ResponseEntity.ok(new ApiResponse<>(true, "查询成功", scores));
+            
+        } catch (Exception e) {
+            logger.error("查询班级课后作业成绩失败", e);
+            return ResponseEntity.badRequest()
+                    .body(new ApiResponse<>(false, "查询失败: " + e.getMessage(), null));
+        }
+    }
     
     /**
      * 从认证信息中获取用户ID

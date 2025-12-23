@@ -69,6 +69,21 @@ public class User implements UserDetails {
     @Column(name = "sunshine_total_calories", nullable = false)
     private Integer sunshineTotalCalories = 0;
     
+    @Column(name = "total_squat", nullable = false)
+    private Integer totalSquat = 0;
+    
+    @Column(name = "total_sit_up", nullable = false)
+    private Integer totalSitUp = 0;
+    
+    @Column(name = "total_push_up", nullable = false)
+    private Integer totalPushUp = 0;
+    
+    @Column(name = "total_pull_up", nullable = false)
+    private Integer totalPullUp = 0;
+    
+    @Column(name = "total_jump_rope", nullable = false)
+    private Integer totalJumpRope = 0;
+    
     @Column(name = "study_hours", nullable = false)
     private Integer studyHours = 0;
     
@@ -163,6 +178,21 @@ public class User implements UserDetails {
     
     public Integer getSunshineTotalCalories() { return sunshineTotalCalories; }
     public void setSunshineTotalCalories(Integer sunshineTotalCalories) { this.sunshineTotalCalories = sunshineTotalCalories; }
+    
+    public Integer getTotalSquat() { return totalSquat; }
+    public void setTotalSquat(Integer totalSquat) { this.totalSquat = totalSquat; }
+    
+    public Integer getTotalSitUp() { return totalSitUp; }
+    public void setTotalSitUp(Integer totalSitUp) { this.totalSitUp = totalSitUp; }
+    
+    public Integer getTotalPushUp() { return totalPushUp; }
+    public void setTotalPushUp(Integer totalPushUp) { this.totalPushUp = totalPushUp; }
+    
+    public Integer getTotalPullUp() { return totalPullUp; }
+    public void setTotalPullUp(Integer totalPullUp) { this.totalPullUp = totalPullUp; }
+    
+    public Integer getTotalJumpRope() { return totalJumpRope; }
+    public void setTotalJumpRope(Integer totalJumpRope) { this.totalJumpRope = totalJumpRope; }
     
     public Integer getStudyHours() { return studyHours; }
     public void setStudyHours(Integer studyHours) { this.studyHours = studyHours; }
