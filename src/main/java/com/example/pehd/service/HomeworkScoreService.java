@@ -186,9 +186,16 @@ public class HomeworkScoreService {
         // 获取班级课后作业记录
         List<HomeworkScore> scores;
         if (date != null) {
-            scores = homeworkScoreRepository.findByClassNameAndDate(currentUser.getClassName(), date);
+            // 查询指定日期的记录（使用timestamp索引）
+            LocalDateTime startTime = date.atStartOfDay(); // 2025-12-23 00:00:00
+            LocalDateTime endTime = date.plusDays(1).atStartOfDay(); // 2025-12-24 00:00:00
+            scores = homeworkScoreRepository.findByClassNameAndDateRange(
+                currentUser.getClassName(), startTime, endTime);
         } else {
-            scores = homeworkScoreRepository.findByClassName(currentUser.getClassName());
+            // 未指定日期，默认查询最近7天的记录
+            LocalDateTime oneWeekAgo = LocalDateTime.now().minusDays(7);
+            scores = homeworkScoreRepository.findByClassNameAfterTime(
+                currentUser.getClassName(), oneWeekAgo);
         }
         
         // 转换为DTO

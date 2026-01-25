@@ -59,23 +59,27 @@ public interface HomeworkScoreRepository extends JpaRepository<HomeworkScore, St
     long countByStudentId(String studentId);
     
     /**
-     * 查询班级所有学生在指定日期的作业记录
+     * 查询班级所有学生在指定日期的作业记录（使用范围查询以利用timestamp索引）
      */
     @Query("SELECT h FROM HomeworkScore h " +
            "JOIN User u ON h.studentId = u.studentId " +
            "WHERE u.className = :className " +
-           "AND DATE(h.timestamp) = :date " +
+           "AND h.timestamp >= :startTime " +
+           "AND h.timestamp < :endTime " +
            "ORDER BY h.timestamp DESC")
-    List<HomeworkScore> findByClassNameAndDate(@Param("className") String className, 
-                                                 @Param("date") LocalDate date);
+    List<HomeworkScore> findByClassNameAndDateRange(@Param("className") String className, 
+                                                      @Param("startTime") LocalDateTime startTime,
+                                                      @Param("endTime") LocalDateTime endTime);
     
     /**
-     * 查询班级所有学生的所有作业记录
+     * 查询班级所有学生在指定时间范围内的作业记录（使用范围查询以利用timestamp索引）
      */
     @Query("SELECT h FROM HomeworkScore h " +
            "JOIN User u ON h.studentId = u.studentId " +
            "WHERE u.className = :className " +
+           "AND h.timestamp >= :startTime " +
            "ORDER BY h.timestamp DESC")
-    List<HomeworkScore> findByClassName(@Param("className") String className);
+    List<HomeworkScore> findByClassNameAfterTime(@Param("className") String className,
+                                                   @Param("startTime") LocalDateTime startTime);
 }
 
