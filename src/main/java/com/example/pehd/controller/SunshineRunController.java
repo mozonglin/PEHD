@@ -3,6 +3,7 @@ package com.example.pehd.controller;
 import com.example.pehd.dto.*;
 import com.example.pehd.entity.User;
 import com.example.pehd.repository.UserRepository;
+import com.example.pehd.service.FaceVerificationService;
 import com.example.pehd.service.SunshineRunService;
 import com.example.pehd.service.PlaygroundCoordinateService;
 import jakarta.validation.Valid;
@@ -33,6 +34,9 @@ public class SunshineRunController {
 
     @Autowired
     private PlaygroundCoordinateService playgroundCoordinateService;
+
+    @Autowired
+    private FaceVerificationService faceVerificationService;
     
     /**
      * 1. 上传阳光跑记录
@@ -239,6 +243,59 @@ public class SunshineRunController {
         }
     }
     
+    /**
+     * 10. 人脸识别验证（代理阿里云 FaceBody CompareFace）
+     * POST /sunshine-run/face-verify
+     *
+     * 请求体：
+     * {
+     *   "capturedImageBase64": "...",   // 前置摄像头拍摄图片的 Base64（JPEG）
+     *   "referencePhotoUrl":  "..."     // 可选；若为空则用当前登录用户学号自动构造
+     * }
+     *
+     * 响应体：
+     * {
+     *   "success":    true/false,
+     *   "message":    "验证成功" / "人脸不匹配，相似度 xx% < 阈值 70%",
+     *   "confidence": 85.3             // 阿里云返回的相似度（仅 success=true 时保证有值）
+     * }
+     */
+    @PostMapping("/face-verify")
+    public ResponseEntity<FaceVerifyResponse> faceVerify(
+            @Valid @RequestBody FaceVerifyRequest request,
+            Authentication authentication) {
+        try {
+            String userId = getUserId(authentication);
+
+            // 若客户端未传参考照片 URL，则从当前用户学号自动构造
+            String refUrl = request.getReferencePhotoUrl();
+            if (refUrl == null || refUrl.isBlank()) {
+                User user = userRepository.findById(userId)
+                        .orElseThrow(() -> new RuntimeException("用户不存在"));
+                String studentId = user.getStudentId();
+                if (studentId == null || studentId.isBlank()) {
+                    return ResponseEntity.badRequest()
+                            .body(FaceVerifyResponse.fail("用户学号未设置，无法定位参考照片"));
+                }
+                logger.info("人脸验证：用户 {} 未传参考照片URL，使用学号 {} 构造", userId, studentId);
+                refUrl = null; // 让 service 用 studentId 构造
+                FaceVerifyResponse result = faceVerificationService.verify(
+                        request.getCapturedImageBase64(), null, studentId);
+                logger.info("人脸验证结果：success={}, confidence={}", result.isSuccess(), result.getConfidence());
+                return ResponseEntity.ok(result);
+            }
+
+            FaceVerifyResponse result = faceVerificationService.verify(
+                    request.getCapturedImageBase64(), refUrl, null);
+            logger.info("人脸验证结果：success={}, confidence={}", result.isSuccess(), result.getConfidence());
+            return ResponseEntity.ok(result);
+
+        } catch (Exception e) {
+            logger.error("人脸验证接口异常", e);
+            return ResponseEntity.ok(FaceVerifyResponse.fail("服务器错误：" + e.getMessage()));
+        }
+    }
+
     /**
      * 从认证信息中获取用户ID
      */

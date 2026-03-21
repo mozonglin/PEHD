@@ -49,6 +49,13 @@ dependencies {
     
     // Common utils
     implementation 'org.apache.commons:commons-lang3'
+
+    // 阿里云人脸识别 SDK（FaceBody）- Maven Central 最新版 6.0.0
+    // 该 jar 采用 shaded 打包，内含 tea-openapi / tea-util / credentials-java 等依赖
+    implementation('com.aliyun:facebody20191230:6.0.0') {
+        // 排除与 Spring Boot 可能冲突的 shaded 内嵌类（okhttp3/slf4j 已被重定位）
+        exclude group: 'org.slf4j'
+    }
     
     // Test dependencies
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
