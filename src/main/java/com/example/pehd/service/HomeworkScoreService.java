@@ -74,6 +74,12 @@ public class HomeworkScoreService {
             case JUMP_ROPE:
                 user.setTotalJumpRope(user.getTotalJumpRope() + count);
                 break;
+            case JUMPING_JACK:
+                user.setTotalJumpingJack(user.getTotalJumpingJack() + count);
+                break;
+            case HIGH_KNEES:
+                user.setTotalHighKnees(user.getTotalHighKnees() + count);
+                break;
         }
         userRepository.save(user);
     }
@@ -121,8 +127,10 @@ public class HomeworkScoreService {
         ExerciseStatsDto pushUp = calculateExerciseStats(studentId, ExerciseType.PUSH_UP, user.getTotalPushUp());
         ExerciseStatsDto pullUp = calculateExerciseStats(studentId, ExerciseType.PULL_UP, user.getTotalPullUp());
         ExerciseStatsDto jumpRope = calculateExerciseStats(studentId, ExerciseType.JUMP_ROPE, user.getTotalJumpRope());
+        ExerciseStatsDto jumpingJack = calculateExerciseStats(studentId, ExerciseType.JUMPING_JACK, user.getTotalJumpingJack());
+        ExerciseStatsDto highKnees = calculateExerciseStats(studentId, ExerciseType.HIGH_KNEES, user.getTotalHighKnees());
         
-        return new HomeworkScoreStatsDto(totalSubmissions, squat, sitUp, pushUp, pullUp, jumpRope);
+        return new HomeworkScoreStatsDto(totalSubmissions, squat, sitUp, pushUp, pullUp, jumpRope, jumpingJack, highKnees);
     }
     
     /**

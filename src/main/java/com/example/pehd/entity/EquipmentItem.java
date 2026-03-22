@@ -66,6 +66,9 @@ public class EquipmentItem {
     @Size(max = 50, message = "存放位置长度不能超过50个字符")
     @Column(name = "storage_location", length = 50)
     private String storageLocation;
+
+    @Column(name = "school", length = 100)
+    private String school;
     
     @Column(name = "created_by", length = 36)
     private String createdBy;
@@ -204,6 +207,9 @@ public class EquipmentItem {
     public void setStorageLocation(String storageLocation) {
         this.storageLocation = storageLocation;
     }
+
+    public String getSchool() { return school; }
+    public void setSchool(String school) { this.school = school; }
     
     public String getCreatedBy() {
         return createdBy;

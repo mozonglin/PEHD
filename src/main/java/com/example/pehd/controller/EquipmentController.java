@@ -51,18 +51,20 @@ public class EquipmentController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "createdAt") String sortBy,
-            @RequestParam(defaultValue = "desc") String sortDir) {
+            @RequestParam(defaultValue = "desc") String sortDir,
+            Authentication authentication) {
         
         try {
+            String userId = authentication != null ? authentication.getName() : null;
             Sort sort = Sort.by(sortDir.equalsIgnoreCase("desc") ? 
                 Sort.Direction.DESC : Sort.Direction.ASC, sortBy);
             Pageable pageable = PageRequest.of(page, size, sort);
             
             Page<EquipmentItemDto> equipments;
             if (categoryId != null && !categoryId.isEmpty()) {
-                equipments = equipmentService.getEquipmentsByCategory(categoryId, pageable);
+                equipments = equipmentService.getEquipmentsByCategory(categoryId, pageable, userId);
             } else {
-                equipments = equipmentService.searchEquipments(null, null, pageable);
+                equipments = equipmentService.searchEquipments(null, null, pageable, userId);
             }
             
             return ResponseEntity.ok(new ApiResponse<>(true, "获取器材列表成功", equipments));
@@ -82,14 +84,16 @@ public class EquipmentController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "createdAt") String sortBy,
-            @RequestParam(defaultValue = "desc") String sortDir) {
+            @RequestParam(defaultValue = "desc") String sortDir,
+            Authentication authentication) {
         
         try {
+            String userId = authentication != null ? authentication.getName() : null;
             Sort sort = Sort.by(sortDir.equalsIgnoreCase("desc") ? 
                 Sort.Direction.DESC : Sort.Direction.ASC, sortBy);
             Pageable pageable = PageRequest.of(page, size, sort);
             
-            Page<EquipmentItemDto> equipments = equipmentService.searchEquipments(categoryId, keyword, pageable);
+            Page<EquipmentItemDto> equipments = equipmentService.searchEquipments(categoryId, keyword, pageable, userId);
             
             return ResponseEntity.ok(new ApiResponse<>(true, "搜索器材成功", equipments));
         } catch (Exception e) {

@@ -84,6 +84,12 @@ public class User implements UserDetails {
     @Column(name = "total_jump_rope", nullable = false)
     private Integer totalJumpRope = 0;
     
+    @Column(name = "total_jumping_jack", nullable = false)
+    private Integer totalJumpingJack = 0;
+    
+    @Column(name = "total_high_knees", nullable = false)
+    private Integer totalHighKnees = 0;
+    
     @Column(name = "study_hours", nullable = false)
     private Integer studyHours = 0;
     
@@ -193,6 +199,12 @@ public class User implements UserDetails {
     
     public Integer getTotalJumpRope() { return totalJumpRope; }
     public void setTotalJumpRope(Integer totalJumpRope) { this.totalJumpRope = totalJumpRope; }
+    
+    public Integer getTotalJumpingJack() { return totalJumpingJack; }
+    public void setTotalJumpingJack(Integer totalJumpingJack) { this.totalJumpingJack = totalJumpingJack; }
+    
+    public Integer getTotalHighKnees() { return totalHighKnees; }
+    public void setTotalHighKnees(Integer totalHighKnees) { this.totalHighKnees = totalHighKnees; }
     
     public Integer getStudyHours() { return studyHours; }
     public void setStudyHours(Integer studyHours) { this.studyHours = studyHours; }

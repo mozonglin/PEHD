@@ -122,4 +122,14 @@ public interface EquipmentItemRepository extends JpaRepository<EquipmentItem, St
      * 检查器材名称在同一分类下是否存在
      */
     boolean existsByCategoryIdAndName(String categoryId, String name);
+
+    // ===== 按学校过滤 =====
+    Page<EquipmentItem> findBySchoolAndIsDeletedFalse(String school, Pageable pageable);
+
+    Page<EquipmentItem> findBySchoolAndCategoryIdAndIsDeletedFalse(String school, String categoryId, Pageable pageable);
+
+    Page<EquipmentItem> findBySchoolAndNameContainingAndIsDeletedFalse(String school, String name, Pageable pageable);
+
+    Page<EquipmentItem> findBySchoolAndCategoryIdAndNameContainingAndIsDeletedFalse(
+            String school, String categoryId, String name, Pageable pageable);
 }

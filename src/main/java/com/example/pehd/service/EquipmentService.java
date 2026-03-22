@@ -59,46 +59,68 @@ public class EquipmentService {
         }).collect(Collectors.toList());
     }
     
+    private String getUserSchool(String studentId) {
+        if (studentId == null) return null;
+        return userRepository.findByStudentId(studentId).map(u -> u.getSchool()).orElse(null);
+    }
+
     /**
-     * 根据分类ID获取器材列表
+     * 根据分类ID获取器材列表（按学校隔离）
      */
     @Transactional(readOnly = true)
-    public Page<EquipmentItemDto> getEquipmentsByCategory(String categoryId, Pageable pageable) {
-        Page<EquipmentItem> items = itemRepository.findByCategoryIdAndIsDeletedFalse(categoryId, pageable);
-        
+    public Page<EquipmentItemDto> getEquipmentsByCategory(String categoryId, Pageable pageable, String userId) {
+        String school = getUserSchool(userId);
+        Page<EquipmentItem> items;
+        if (school != null) {
+            items = itemRepository.findBySchoolAndCategoryIdAndIsDeletedFalse(school, categoryId, pageable);
+        } else {
+            items = itemRepository.findByCategoryIdAndIsDeletedFalse(categoryId, pageable);
+        }
         List<EquipmentItemDto> dtos = items.getContent().stream()
             .map(this::convertToEquipmentItemDto)
             .collect(Collectors.toList());
-        
         return new PageImpl<>(dtos, pageable, items.getTotalElements());
     }
     
     /**
-     * 搜索器材
+     * 搜索器材（按学校隔离）
      */
     @Transactional(readOnly = true)
-    public Page<EquipmentItemDto> searchEquipments(String categoryId, String keyword, Pageable pageable) {
+    public Page<EquipmentItemDto> searchEquipments(String categoryId, String keyword, Pageable pageable, String userId) {
+        String school = getUserSchool(userId);
         Page<EquipmentItem> items;
-        
-        if (categoryId != null && !categoryId.isEmpty()) {
-            if (keyword != null && !keyword.isEmpty()) {
-                items = itemRepository.findByCategoryIdAndNameContainingAndIsDeletedFalse(
-                    categoryId, keyword, pageable);
+        if (school != null) {
+            if (categoryId != null && !categoryId.isEmpty()) {
+                if (keyword != null && !keyword.isEmpty()) {
+                    items = itemRepository.findBySchoolAndCategoryIdAndNameContainingAndIsDeletedFalse(school, categoryId, keyword, pageable);
+                } else {
+                    items = itemRepository.findBySchoolAndCategoryIdAndIsDeletedFalse(school, categoryId, pageable);
+                }
             } else {
-                items = itemRepository.findByCategoryIdAndIsDeletedFalse(categoryId, pageable);
+                if (keyword != null && !keyword.isEmpty()) {
+                    items = itemRepository.findBySchoolAndNameContainingAndIsDeletedFalse(school, keyword, pageable);
+                } else {
+                    items = itemRepository.findBySchoolAndIsDeletedFalse(school, pageable);
+                }
             }
         } else {
-            if (keyword != null && !keyword.isEmpty()) {
-                items = itemRepository.findByNameContainingAndIsDeletedFalse(keyword, pageable);
+            if (categoryId != null && !categoryId.isEmpty()) {
+                if (keyword != null && !keyword.isEmpty()) {
+                    items = itemRepository.findByCategoryIdAndNameContainingAndIsDeletedFalse(categoryId, keyword, pageable);
+                } else {
+                    items = itemRepository.findByCategoryIdAndIsDeletedFalse(categoryId, pageable);
+                }
             } else {
-                items = itemRepository.findByIsDeletedFalse(pageable);
+                if (keyword != null && !keyword.isEmpty()) {
+                    items = itemRepository.findByNameContainingAndIsDeletedFalse(keyword, pageable);
+                } else {
+                    items = itemRepository.findByIsDeletedFalse(pageable);
+                }
             }
         }
-        
         List<EquipmentItemDto> dtos = items.getContent().stream()
             .map(this::convertToEquipmentItemDto)
             .collect(Collectors.toList());
-        
         return new PageImpl<>(dtos, pageable, items.getTotalElements());
     }
     

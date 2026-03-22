@@ -8,18 +8,23 @@ public class HomeworkScoreStatsDto {
     private ExerciseStatsDto pushUp;
     private ExerciseStatsDto pullUp;
     private ExerciseStatsDto jumpRope;
+    private ExerciseStatsDto jumpingJack;
+    private ExerciseStatsDto highKnees;
     
     // Constructors
     public HomeworkScoreStatsDto() {}
     
     public HomeworkScoreStatsDto(Integer totalSubmissions, ExerciseStatsDto squat, ExerciseStatsDto sitUp,
-                                  ExerciseStatsDto pushUp, ExerciseStatsDto pullUp, ExerciseStatsDto jumpRope) {
+                                  ExerciseStatsDto pushUp, ExerciseStatsDto pullUp, ExerciseStatsDto jumpRope,
+                                  ExerciseStatsDto jumpingJack, ExerciseStatsDto highKnees) {
         this.totalSubmissions = totalSubmissions;
         this.squat = squat;
         this.sitUp = sitUp;
         this.pushUp = pushUp;
         this.pullUp = pullUp;
         this.jumpRope = jumpRope;
+        this.jumpingJack = jumpingJack;
+        this.highKnees = highKnees;
     }
     
     // Getters and Setters
@@ -40,5 +45,11 @@ public class HomeworkScoreStatsDto {
     
     public ExerciseStatsDto getJumpRope() { return jumpRope; }
     public void setJumpRope(ExerciseStatsDto jumpRope) { this.jumpRope = jumpRope; }
+    
+    public ExerciseStatsDto getJumpingJack() { return jumpingJack; }
+    public void setJumpingJack(ExerciseStatsDto jumpingJack) { this.jumpingJack = jumpingJack; }
+    
+    public ExerciseStatsDto getHighKnees() { return highKnees; }
+    public void setHighKnees(ExerciseStatsDto highKnees) { this.highKnees = highKnees; }
 }
 
