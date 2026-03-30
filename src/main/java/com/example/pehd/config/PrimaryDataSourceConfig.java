@@ -42,7 +42,7 @@ public class PrimaryDataSourceConfig {
     @ConfigurationProperties("spring.datasource")
     public DataSource primaryDataSource() {
         return DataSourceBuilder.create()
-                .url("jdbc:mysql://38.207.179.218:3306/pexitong3?allowPublicKeyRetrieval=true&useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai")
+                .url("jdbc:mysql://38.207.179.218:3306/pexitongtest?allowPublicKeyRetrieval=true&useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai")
                 .username("pexitong3")
                 .password("790128mmmm")
                 .driverClassName("com.mysql.cj.jdbc.Driver")
