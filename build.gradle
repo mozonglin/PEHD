@@ -37,6 +37,8 @@ dependencies {
     
     // Hibernate commons annotations
     implementation 'org.hibernate.common:hibernate-commons-annotations:6.0.6.Final'
+    implementation 'io.smallrye:jandex:3.5.3'
+    implementation 'net.bytebuddy:byte-buddy'
     
     // JAXB dependencies for Hibernate
     implementation 'jakarta.xml.bind:jakarta.xml.bind-api:4.0.0'

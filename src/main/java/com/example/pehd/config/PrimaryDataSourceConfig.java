@@ -69,7 +69,6 @@ public class PrimaryDataSourceConfig {
     public LocalContainerEntityManagerFactoryBean entityManagerFactory(
             EntityManagerFactoryBuilder builder,
             @Qualifier("primaryDataSource") DataSource dataSource) {
-        
         // 只扫描主包，不包括checkuser子包
         // 通过明确列出所有需要的实体类所在的包（不递归扫描子包）
         LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
@@ -92,7 +91,7 @@ public class PrimaryDataSourceConfig {
         // 排除checkuser包
         properties.put("hibernate.archive.autodetection", "class");
         em.setJpaPropertyMap(properties);
-        
+
         return em;
     }
     
