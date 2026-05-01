@@ -10,6 +10,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @Service
@@ -25,7 +27,9 @@ public class TempClassService {
     private JdbcTemplate jdbcTemplate;
 
     public List<TempClass> getAvailableClasses(String school, String semester) {
-        return tempClassRepository.findBySchoolAndSemester(school, semester);
+        List<TempClass> rows = tempClassRepository.findBySchoolAndSemester(school, semester);
+        rows.forEach(this::enrichTempClassDisplayFields);
+        return rows;
     }
 
     @Transactional
@@ -72,7 +76,10 @@ public class TempClassService {
 
         Map<String, Object> result = new HashMap<>();
         result.put("enrollment", enrollment);
-        tempClassOpt.ifPresent(tc -> result.put("tempClass", tc));
+        tempClassOpt.ifPresent(tc -> {
+            enrichTempClassDisplayFields(tc);
+            result.put("tempClass", tc);
+        });
         return result;
     }
 
@@ -101,5 +108,37 @@ public class TempClassService {
                 "SELECT COUNT(*) FROM class_selection_windows WHERE school = ? AND semester = ? AND is_active = 1 AND open_time <= ? AND close_time >= ?",
                 Integer.class, school, semester, now, now);
         return count != null && count > 0;
+    }
+
+    private void enrichTempClassDisplayFields(TempClass tempClass) {
+        tempClass.setStartTime(normalizeTimeString(tempClass.getStartTime()));
+        tempClass.setEndTime(normalizeTimeString(tempClass.getEndTime()));
+        try {
+            String teacherName = jdbcTemplate.queryForObject(
+                    "SELECT real_name FROM users WHERE id = ? LIMIT 1",
+                    String.class,
+                    tempClass.getTeacherId()
+            );
+            tempClass.setTeacherName(teacherName);
+        } catch (Exception ignored) {
+            tempClass.setTeacherName("");
+        }
+    }
+
+    private String normalizeTimeString(String raw) {
+        if (raw == null || raw.isBlank()) {
+            return raw;
+        }
+        try {
+            double excelValue = Double.parseDouble(raw.trim());
+            double fraction = excelValue - Math.floor(excelValue);
+            int totalSeconds = (int) Math.round(fraction * 24 * 60 * 60);
+            if (totalSeconds >= 24 * 60 * 60) {
+                totalSeconds = totalSeconds % (24 * 60 * 60);
+            }
+            return LocalTime.ofSecondOfDay(totalSeconds).format(DateTimeFormatter.ofPattern("HH:mm"));
+        } catch (NumberFormatException ignored) {
+            return raw;
+        }
     }
 }

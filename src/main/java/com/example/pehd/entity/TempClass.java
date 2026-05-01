@@ -1,7 +1,6 @@
 package com.example.pehd.entity;
 
 import jakarta.persistence.*;
-import java.time.LocalTime;
 import java.time.LocalDateTime;
 
 @Entity
@@ -37,10 +36,10 @@ public class TempClass {
     private Integer dayOfWeek;
 
     @Column(name = "start_time")
-    private LocalTime startTime;
+    private String startTime;
 
     @Column(name = "end_time")
-    private LocalTime endTime;
+    private String endTime;
 
     @Column(name = "location", length = 200)
     private String location;
@@ -50,6 +49,9 @@ public class TempClass {
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    @Transient
+    private String teacherName;
 
     public TempClass() {}
 
@@ -80,11 +82,11 @@ public class TempClass {
     public Integer getDayOfWeek() { return dayOfWeek; }
     public void setDayOfWeek(Integer dayOfWeek) { this.dayOfWeek = dayOfWeek; }
 
-    public LocalTime getStartTime() { return startTime; }
-    public void setStartTime(LocalTime startTime) { this.startTime = startTime; }
+    public String getStartTime() { return startTime; }
+    public void setStartTime(String startTime) { this.startTime = startTime; }
 
-    public LocalTime getEndTime() { return endTime; }
-    public void setEndTime(LocalTime endTime) { this.endTime = endTime; }
+    public String getEndTime() { return endTime; }
+    public void setEndTime(String endTime) { this.endTime = endTime; }
 
     public String getLocation() { return location; }
     public void setLocation(String location) { this.location = location; }
@@ -94,4 +96,7 @@ public class TempClass {
 
     public LocalDateTime getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
+
+    public String getTeacherName() { return teacherName; }
+    public void setTeacherName(String teacherName) { this.teacherName = teacherName; }
 }

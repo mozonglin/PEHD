@@ -18,7 +18,7 @@ import java.util.List;
 @RequestMapping("/homework-scores")
 @CrossOrigin(origins = "*", maxAge = 3600)
 public class HomeworkScoreController {
-    
+
     @Autowired
     private HomeworkScoreService homeworkScoreService;
     
