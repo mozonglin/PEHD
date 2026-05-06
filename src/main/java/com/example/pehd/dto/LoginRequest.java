@@ -18,6 +18,8 @@ public class LoginRequest {
     @NotBlank(message = "验证码不能为空")
     private String verificationCode;
     
+    private String school;
+    
     // Constructors
     public LoginRequest() {}
     
@@ -26,6 +28,14 @@ public class LoginRequest {
         this.studentId = studentId;
         this.phoneNumber = phoneNumber;
         this.verificationCode = verificationCode;
+    }
+    
+    public LoginRequest(String name, String studentId, String phoneNumber, String verificationCode, String school) {
+        this.name = name;
+        this.studentId = studentId;
+        this.phoneNumber = phoneNumber;
+        this.verificationCode = verificationCode;
+        this.school = school;
     }
     
     // Getters and Setters
@@ -40,4 +50,7 @@ public class LoginRequest {
     
     public String getVerificationCode() { return verificationCode; }
     public void setVerificationCode(String verificationCode) { this.verificationCode = verificationCode; }
+    
+    public String getSchool() { return school; }
+    public void setSchool(String school) { this.school = school; }
 } 

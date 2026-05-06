@@ -31,32 +31,31 @@ public class AuthService {
      */
     public LoginResponse login(LoginRequest loginRequest) {
         // TODO: 暂时禁用验证码校验，等报备成功后再启用
-        // 验证验证码
-        // boolean isCodeValid = verificationService.verifyCode(
-        //     loginRequest.getPhoneNumber(), 
-        //     loginRequest.getVerificationCode(), 
-        //     "login"
-        // );
-        // 
-        // if (!isCodeValid) {
-        //     throw new RuntimeException("验证码错误或已过期");
-        // }
-        
-        // 暂时跳过验证码验证，直接返回true
         boolean isCodeValid = true;
         
-        // 查找用户
-        Optional<User> userOptional = userRepository.findByNameAndStudentIdAndPhoneNumber(
-            loginRequest.getName(), 
-            loginRequest.getStudentId(), 
-            loginRequest.getPhoneNumber()
-        );
+        // 先检查学号是否已注册
+        Optional<User> byStudentId = userRepository.findByStudentId(loginRequest.getStudentId());
+        if (byStudentId.isEmpty()) {
+            throw new RuntimeException("该学号尚未鉴权，请先完成学号鉴权");
+        }
         
-        User user;
-        if (userOptional.isPresent()) {
-            user = userOptional.get();
-        } else {
-            throw new RuntimeException("用户信息不匹配，请检查姓名、学号和手机号");
+        User user = byStudentId.get();
+        
+        // 检查学校是否匹配
+        if (loginRequest.getSchool() != null && !loginRequest.getSchool().isEmpty()) {
+            if (!user.getSchool().equals(loginRequest.getSchool())) {
+                throw new RuntimeException("所选学校与该学号注册信息不一致");
+            }
+        }
+        
+        // 检查姓名是否匹配
+        if (!user.getName().equals(loginRequest.getName())) {
+            throw new RuntimeException("姓名与该学号注册信息不一致");
+        }
+        
+        // 检查手机号是否匹配
+        if (!user.getPhoneNumber().equals(loginRequest.getPhoneNumber())) {
+            throw new RuntimeException("手机号与该学号注册信息不一致");
         }
         
         // 更新登录状态
@@ -71,50 +70,48 @@ public class AuthService {
     }
     
     /**
-     * 用户注册
+     * 用户注册（学号鉴权）
      */
     public LoginResponse register(LoginRequest registerRequest) {
         // TODO: 暂时禁用验证码校验，等报备成功后再启用
-        // 验证验证码
-        // boolean isCodeValid = verificationService.verifyCode(
-        //     registerRequest.getPhoneNumber(), 
-        //     registerRequest.getVerificationCode(), 
-        //     "register"
-        // );
-        // 
-        // if (!isCodeValid) {
-        //     throw new RuntimeException("验证码错误或已过期");
-        // }
-        
-        // 暂时跳过验证码验证，直接返回true
         boolean isCodeValid = true;
         
-        // 验证学生信息是否在checkstudent表中存在
+        // 检查是否已鉴权（学号已存在于用户表）
+        if (userRepository.existsByStudentId(registerRequest.getStudentId())) {
+            throw new RuntimeException("该学号已完成鉴权，无需重复操作，请直接登录");
+        }
+        
+        // 检查手机号是否已被其他账号绑定
+        if (userRepository.existsByPhoneNumber(registerRequest.getPhoneNumber())) {
+            throw new RuntimeException("该手机号已被其他账号绑定");
+        }
+        
+        // 学校字段必填校验
+        if (registerRequest.getSchool() == null || registerRequest.getSchool().trim().isEmpty()) {
+            throw new RuntimeException("请选择学校");
+        }
+        
+        // 验证学生信息：学号+姓名+学校 三项必须全部匹配
         StudentValidationService.StudentValidationResult validationResult = 
-            studentValidationService.validateStudent(registerRequest.getStudentId(), registerRequest.getName());
+            studentValidationService.validateStudent(
+                registerRequest.getStudentId(), 
+                registerRequest.getName(),
+                registerRequest.getSchool()
+            );
         
         if (!validationResult.isValid()) {
             throw new RuntimeException(validationResult.getMessage());
         }
         
-        // 检查用户是否已存在
-        if (userRepository.existsByStudentId(registerRequest.getStudentId())) {
-            throw new RuntimeException("学号已存在");
-        }
-        
-        if (userRepository.existsByPhoneNumber(registerRequest.getPhoneNumber())) {
-            throw new RuntimeException("手机号已存在");
-        }
-        
-        // 创建新用户，使用从checkstudent表中获取的学校、学院和班级信息
         User user = new User(
             registerRequest.getName(), 
             registerRequest.getStudentId(), 
             registerRequest.getPhoneNumber(),
-            validationResult.getSchool(), // 从checkstudent表中获取学校信息
-            validationResult.getCollege(), // 从checkstudent表中获取学院信息
-            validationResult.getClassName() // 从checkstudent表中获取班级信息
+            validationResult.getSchool(),
+            validationResult.getCollege(),
+            validationResult.getClassName()
         );
+        user.setGender(validationResult.getGender());
         
         user.setIsLoggedIn(true);
         user = userRepository.save(user);

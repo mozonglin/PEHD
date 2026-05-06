@@ -21,49 +21,61 @@ public class StudentValidationService {
     private CheckStudentRepository checkStudentRepository;
     
     /**
-     * 验证学生信息
-     * @param studentId 学号
-     * @param name 姓名
-     * @return 验证结果，包含学校和学院信息
+     * 验证学生信息（需要学号+姓名+学校三项全部匹配）
      */
-    public StudentValidationResult validateStudent(String studentId, String name) {
-        Optional<CheckStudent> checkStudentOpt = checkStudentRepository.findByStudentIdAndName(studentId, name);
-        
-        if (checkStudentOpt.isPresent()) {
-            CheckStudent checkStudent = checkStudentOpt.get();
-            return new StudentValidationResult(
-                true, 
-                checkStudent.getSchool(), 
-                checkStudent.getCollege(),
-                checkStudent.getClassName(),
-                "验证成功"
-            );
-        } else {
-            return new StudentValidationResult(
-                false, 
-                null, 
-                null,
-                null,
-                "学号和姓名不匹配，请检查输入信息"
-            );
+    public StudentValidationResult validateStudent(String studentId, String name, String school) {
+        // 先查学号是否存在
+        Optional<CheckStudent> byIdOpt = checkStudentRepository.findByStudentId(studentId);
+        if (byIdOpt.isEmpty()) {
+            return new StudentValidationResult(false, null, null, null, null,
+                "学号不存在，请确认学号是否正确");
         }
+        
+        CheckStudent record = byIdOpt.get();
+        
+        // 学校不匹配
+        if (!record.getSchool().equals(school)) {
+            return new StudentValidationResult(false, null, null, null, null,
+                "学校与学号不匹配，请确认所选学校是否正确");
+        }
+        
+        // 姓名不匹配
+        if (!record.getName().equals(name)) {
+            return new StudentValidationResult(false, null, null, null, null,
+                "姓名与学号不匹配，请确认姓名是否正确");
+        }
+        
+        return new StudentValidationResult(
+            true,
+            record.getSchool(),
+            record.getCollege(),
+            record.getClassName(),
+            record.getGender(),
+            "验证成功"
+        );
     }
     
     /**
-     * 学生验证结果类
+     * 获取预导入表中所有学校列表
      */
+    public java.util.List<String> getAllSchools() {
+        return checkStudentRepository.findDistinctSchools();
+    }
+    
     public static class StudentValidationResult {
         private final boolean valid;
         private final String school;
         private final String college;
         private final String className;
+        private final String gender;
         private final String message;
         
-        public StudentValidationResult(boolean valid, String school, String college, String className, String message) {
+        public StudentValidationResult(boolean valid, String school, String college, String className, String gender, String message) {
             this.valid = valid;
             this.school = school;
             this.college = college;
             this.className = className;
+            this.gender = gender;
             this.message = message;
         }
         
@@ -81,6 +93,10 @@ public class StudentValidationService {
         
         public String getClassName() {
             return className;
+        }
+
+        public String getGender() {
+            return gender;
         }
         
         public String getMessage() {

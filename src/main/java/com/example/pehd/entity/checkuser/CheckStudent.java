@@ -34,6 +34,9 @@ public class CheckStudent {
     @Size(max = 100, message = "班级名称长度不能超过100个字符")
     @Column(name = "class_name", length = 100)
     private String className;
+
+    @Column(name = "gender", length = 10)
+    private String gender;
     
     // Constructors
     public CheckStudent() {}
@@ -86,6 +89,14 @@ public class CheckStudent {
     
     public void setClassName(String className) {
         this.className = className;
+    }
+
+    public String getGender() {
+        return gender;
+    }
+
+    public void setGender(String gender) {
+        this.gender = gender;
     }
     
     @Override

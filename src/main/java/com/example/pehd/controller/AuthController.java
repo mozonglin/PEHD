@@ -5,12 +5,15 @@ import com.example.pehd.dto.LoginRequest;
 import com.example.pehd.dto.LoginResponse;
 import com.example.pehd.entity.User;
 import com.example.pehd.service.AuthService;
+import com.example.pehd.service.StudentValidationService;
+import com.example.pehd.repository.UserRepository;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -20,6 +23,12 @@ public class AuthController {
     
     @Autowired
     private AuthService authService;
+    
+    @Autowired
+    private StudentValidationService studentValidationService;
+    
+    @Autowired
+    private UserRepository userRepository;
     
     /**
      * 用户登录
@@ -126,6 +135,34 @@ public class AuthController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(ApiResponse.error(e.getMessage()));
+        }
+    }
+    
+    /**
+     * 获取预导入表中的学校列表（用于鉴权页下拉选择）
+     */
+    @GetMapping("/schools/check")
+    public ResponseEntity<ApiResponse<List<String>>> getCheckSchools() {
+        try {
+            List<String> schools = studentValidationService.getAllSchools();
+            return ResponseEntity.ok(ApiResponse.success("获取成功", schools));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ApiResponse.error("获取学校列表失败"));
+        }
+    }
+    
+    /**
+     * 获取已注册用户的学校列表（用于登录页下拉选择）
+     */
+    @GetMapping("/schools/registered")
+    public ResponseEntity<ApiResponse<List<String>>> getRegisteredSchools() {
+        try {
+            List<String> schools = userRepository.findDistinctSchools();
+            return ResponseEntity.ok(ApiResponse.success("获取成功", schools));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ApiResponse.error("获取学校列表失败"));
         }
     }
 } 

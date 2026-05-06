@@ -90,6 +90,12 @@ public interface UserRepository extends JpaRepository<User, String> {
                                                            org.springframework.data.domain.Pageable pageable);
     
     /**
+     * 获取所有已注册用户的学校列表（去重）
+     */
+    @Query("SELECT DISTINCT u.school FROM User u WHERE u.school IS NOT NULL AND u.school <> '' ORDER BY u.school")
+    List<String> findDistinctSchools();
+    
+    /**
      * 获取班级积分统计（按班级分组，统计达标情况）
      */
     @Query("SELECT u.className, " +

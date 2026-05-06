@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -23,6 +24,35 @@ public class SchoolSettingsController {
         Optional<SchoolSettings> settings = schoolSettingsRepository.findBySchool(school);
         int distance = settings.map(SchoolSettings::getSunshineRunDistance).orElse(1600);
         Map<String, Object> data = Map.of("sunshineRunDistance", distance);
+        return ResponseEntity.ok(ApiResponse.success("查询成功", data));
+    }
+
+    @GetMapping("/sunshine-run-settings")
+    public ResponseEntity<ApiResponse<Map<String, Object>>> getSunshineRunSettings(
+            @RequestParam String school,
+            @RequestParam(required = false) String gender) {
+        Optional<SchoolSettings> optSettings = schoolSettingsRepository.findBySchool(school);
+        SchoolSettings settings = optSettings.orElse(null);
+
+        Map<String, Object> data = new HashMap<>();
+
+        if (settings == null) {
+            data.put("sunshineRunDistance", 1600);
+            data.put("paceMin", 3.0);
+            data.put("paceMax", 8.0);
+        } else if ("女".equals(gender) || "female".equalsIgnoreCase(gender)) {
+            data.put("sunshineRunDistance",
+                    settings.getSunshineRunDistanceFemale() != null ? settings.getSunshineRunDistanceFemale() : settings.getSunshineRunDistance());
+            data.put("paceMin", settings.getSunshineRunPaceMinFemale() != null ? settings.getSunshineRunPaceMinFemale() : 3.5);
+            data.put("paceMax", settings.getSunshineRunPaceMaxFemale() != null ? settings.getSunshineRunPaceMaxFemale() : 8.0);
+        } else {
+            data.put("sunshineRunDistance",
+                    settings.getSunshineRunDistanceMale() != null ? settings.getSunshineRunDistanceMale() : settings.getSunshineRunDistance());
+            data.put("paceMin", settings.getSunshineRunPaceMinMale() != null ? settings.getSunshineRunPaceMinMale() : 3.0);
+            data.put("paceMax", settings.getSunshineRunPaceMaxMale() != null ? settings.getSunshineRunPaceMaxMale() : 7.0);
+        }
+
+        data.put("gender", gender != null ? gender : "男");
         return ResponseEntity.ok(ApiResponse.success("查询成功", data));
     }
 }

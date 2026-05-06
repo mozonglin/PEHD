@@ -39,6 +39,9 @@ public class User implements UserDetails {
     @Size(max = 100, message = "班级名称长度不能超过100个字符")
     @Column(name = "class_name", length = 100)
     private String className;
+
+    @Column(name = "gender", length = 10)
+    private String gender;
     
     @NotBlank(message = "手机号不能为空")
     @Pattern(regexp = "^1[3-9]\\d{9}$", message = "手机号格式不正确")
@@ -157,6 +160,9 @@ public class User implements UserDetails {
     
     public String getClassName() { return className; }
     public void setClassName(String className) { this.className = className; }
+
+    public String getGender() { return gender; }
+    public void setGender(String gender) { this.gender = gender; }
     
     public String getPhoneNumber() { return phoneNumber; }
     public void setPhoneNumber(String phoneNumber) { this.phoneNumber = phoneNumber; }
