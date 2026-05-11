@@ -2,9 +2,11 @@ package com.example.pehd.service;
 
 import com.example.pehd.dto.*;
 import com.example.pehd.entity.ExerciseType;
+import com.example.pehd.entity.HomeworkExerciseStandard;
 import com.example.pehd.entity.HomeworkScore;
 import com.example.pehd.entity.User;
 import com.example.pehd.entity.UserRole;
+import com.example.pehd.repository.HomeworkExerciseStandardRepository;
 import com.example.pehd.repository.HomeworkScoreRepository;
 import com.example.pehd.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +31,9 @@ public class HomeworkScoreService {
     @Autowired
     private UserRepository userRepository;
     
+    @Autowired
+    private HomeworkExerciseStandardRepository homeworkExerciseStandardRepository;
+    
     /**
      * 上传课后作业成绩
      */
@@ -37,6 +42,22 @@ public class HomeworkScoreService {
         // 验证学生是否存在
         User user = userRepository.findByStudentId(request.getStudentId())
             .orElseThrow(() -> new RuntimeException("学生不存在"));
+        
+        String school = user.getSchool();
+        String gender = user.getGender();
+        if (school != null && gender != null) {
+            homeworkExerciseStandardRepository
+                .findBySchoolAndExerciseType(school, request.getExerciseType().name())
+                .ifPresent(standard -> {
+                    String genderLabel = "女".equals(gender) ? "女生" : "男生";
+                    int requiredStandard = "女".equals(gender) ? standard.getFemaleStandard() : standard.getMaleStandard();
+                    if (requiredStandard > 0 && request.getCount() < requiredStandard) {
+                        String exerciseName = getExerciseDisplayName(request.getExerciseType());
+                        throw new RuntimeException(exerciseName + "未达到学校要求的" + genderLabel
+                            + "单次最低指标(" + requiredStandard + ")，当前:" + request.getCount());
+                    }
+                });
+        }
         
         // 创建作业成绩记录
         HomeworkScore score = new HomeworkScore();
@@ -229,9 +250,19 @@ public class HomeworkScoreService {
         return result;
     }
     
-    /**
-     * 将Entity转换为DTO
-     */
+    private String getExerciseDisplayName(ExerciseType type) {
+        switch (type) {
+            case SQUAT:        return "深蹲";
+            case SIT_UP:       return "仰卧起坐";
+            case PUSH_UP:      return "俯卧撑";
+            case PULL_UP:      return "引体向上";
+            case JUMP_ROPE:    return "跳绳";
+            case JUMPING_JACK: return "开合跳";
+            case HIGH_KNEES:   return "高抬腿";
+            default:           return type.name();
+        }
+    }
+
     private HomeworkScoreDto convertToDto(HomeworkScore score) {
         return new HomeworkScoreDto(
             score.getId(),
