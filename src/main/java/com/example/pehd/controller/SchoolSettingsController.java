@@ -75,4 +75,15 @@ public class SchoolSettingsController {
         List<HomeworkExerciseStandard> standards = homeworkExerciseStandardRepository.findBySchool(school);
         return ResponseEntity.ok(ApiResponse.success("查询成功", standards));
     }
+
+    @GetMapping("/homework-submission-settings")
+    public ResponseEntity<ApiResponse<Map<String, Object>>> getHomeworkSubmissionSettings(@RequestParam String school) {
+        Optional<SchoolSettings> opt = schoolSettingsRepository.findBySchool(school);
+        int weekly = opt.map(SchoolSettings::getHomeworkWeeklySubmissionsRequired).orElse(3);
+        int weeks = opt.map(SchoolSettings::getHomeworkSubmissionSemesterWeeks).orElse(16);
+        Map<String, Object> data = new HashMap<>();
+        data.put("weeklySubmissionsRequired", weekly);
+        data.put("submissionSemesterWeeks", weeks);
+        return ResponseEntity.ok(ApiResponse.success("查询成功", data));
+    }
 }
